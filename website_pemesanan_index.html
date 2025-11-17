@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pesan Online - Warung Mie</title>
+  <style>
+    body{font-family:Inter,system-ui,Arial;background:#f7fafc;margin:0;color:#111}
+    .container{max-width:960px;margin:28px auto;padding:20px;background:#fff;border-radius:12px;box-shadow:0 6px 24px rgba(16,24,40,.08)}
+    h1{font-size:24px;margin:0 0 10px}
+    .menu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:18px}
+    .card{border:1px solid #e6eef6;padding:12px;border-radius:8px}
+    label{display:block;font-size:13px;margin-bottom:6px}
+    input[type=number]{width:80px;padding:6px;border-radius:6px;border:1px solid #dbeafe}
+    .row{display:flex;gap:12px;align-items:center}
+    .summary{margin-top:18px;padding:12px;border-radius:8px;background:#f1f5f9}
+    .btn{display:inline-block;padding:10px 14px;border-radius:8px;border:0;background:#0ea5a4;color:#fff;cursor:pointer}
+    .muted{color:#666;font-size:13px}
+    .form-row{margin-top:12px}
+    .fullwidth{width:100%;padding:10px;border-radius:8px;border:1px solid #e2e8f0}
+    .small{font-size:13px}
+    footer{margin-top:18px;color:#888;font-size:13px}
+    .note{background:#fffbea;padding:8px;border-radius:6px;border:1px solid #f5e8b4;margin-top:12px}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Pesan Online - Warung Mie</h1>
+    <p class="muted">Pilih menu, masukkan jumlah. Total akan otomatis terhitung. Unggah bukti pembayaran — file akan disimpan ke Google Drive.</p>
+
+    <div class="menu-grid" id="menuGrid"></div>
+
+    <div class="summary">
+      <h3>Ringkasan Pesanan</h3>
+      <div id="orderList" class="muted">Belum ada item.</div>
+      <div style="margin-top:10px">
+        <strong>Total: Rp <span id="grandTotal">0</span></strong>
+      </div>
+    </div>
+
+    <form id="orderForm" class="form-row" method="post" enctype="multipart/form-data">
+      <label class="small">Nama Pemesan</label>
+      <input type="text" name="nama" id="nama" class="fullwidth" required />
+
+      <label class="small">Nomor WhatsApp</label>
+      <input type="tel" name="whatsapp" id="wa" class="fullwidth" placeholder="08xxxxxxxx" required />
+
+      <label class="small">Unggah Bukti Pembayaran (opsional)</label>
+      <input type="file" name="bukti" id="bukti" class="fullwidth" accept="image/*,application/pdf" />
+
+      <!-- GANTI nilai berikut dengan URL Web App Google Apps Script Anda  REPLACE_WITH_YOUR_WEB_APP_URL-->
+      <input type="hidden" name="web_app_url" id="webAppUrl" value="https://script.google.com/macros/s/AKfycbw4gYkF834gicDbo4RWAF11IXW3X804GrbMZXMvfC8EhPe-leonE7fC4c4R76xebfJLGA/exec" />
+
+      <div style="margin-top:12px">
+        <button type="button" class="btn" id="submitBtn">Kirim Pesanan</button>
+      </div>
+    </form>
+
+    <div class="note">
+      <strong>Catatan:</strong> Untuk menyimpan bukti otomatis ke Google Drive Anda perlu:
+      <ol>
+        <li>Membuat folder di Drive, dapatkan folder ID</li>
+        <li>Membuat Google Apps Script Web App (Code.gs) dan deploy</li>
+        <li>Isi URL Web App pada halaman ini</li>
+      </ol>
+    </div>
+
+    <hr />
+    <h4>Daftar menu & harga</h4>
+    <pre style="white-space:pre-wrap">Mie Hompimpa Lv1 - Rp 15.000
+Mie Hompimpa Lv3 - Rp 15.000
+Mie Gacoan Lv0 - Rp 15.000
+Mie Gacoan Lv1 - Rp 15.000
+Mie Gacoan Lv2 - Rp 15.000
+Mie Gacoan Lv3 - Rp 15.000
+Mie Gacoan Lv4 - Rp 15.000
+Mie Gacoan Lv6 - Rp 15.000
+Udang Keju - Rp 12.000
+Udang Rambutan - Rp 12.000
+Pangsit Goreng - Rp 14.000
+Siomay - Rp 13.000
+Lumpia Udang - Rp 13.000
+Lemon Tea - Rp 8.000
+Tea - Rp 6.000
+Es Gobak Sodor - Rp 16.000</pre>
+
+  </div>
+
+  <script>
+    // Menu data
+    const MENU = [
+      {id:'Mie Hompimpa Lv1', price:15000},
+      {id:'Mie Hompimpa Lv3', price:15000},
+      {id:'Mie Gacoan Lv0', price:15000},
+      {id:'Mie Gacoan Lv1', price:15000},
+      {id:'Mie Gacoan Lv2', price:15000},
+      {id:'Mie Gacoan Lv3', price:15000},
+      {id:'Mie Gacoan Lv4', price:15000},
+      {id:'Mie Gacoan Lv6', price:15000},
+      {id:'Udang Keju', price:12000},
+      {id:'Udang Rambutan', price:12000},
+      {id:'Pangsit Goreng', price:14000},
+      {id:'Siomay', price:13000},
+      {id:'Lumpia Udang', price:13000},
+      {id:'Lemon Tea', price:8000},
+      {id:'Tea', price:6000},
+      {id:'Es Gobak Sodor', price:16000}
+    ];
+
+    const menuGrid = document.getElementById('menuGrid');
+    const orderList = document.getElementById('orderList');
+    const grandTotalEl = document.getElementById('grandTotal');
+    const submitBtn = document.getElementById('submitBtn');
+
+    const state = {};
+
+    function currency(num){ return (num).toLocaleString('id-ID'); }
+
+    function renderMenu(){
+      MENU.forEach(item=>{
+        const card = document.createElement('div');card.className='card';
+        card.innerHTML = `<div style="font-weight:600">${item.id}</div><div class="muted">Rp ${currency(item.price)}</div><div class="row" style="margin-top:8px"><label>Qty</label><input type=number min=0 value=0 data-id="${item.id}" style="margin-left:8px" /></div>`;
+        menuGrid.appendChild(card);
+      });
+      menuGrid.querySelectorAll('input[type=number]').forEach(inp=>{
+        inp.addEventListener('input', onQtyChange);
+      });
+    }
+
+    function onQtyChange(e){
+      const id = e.target.dataset.id;
+      const qty = parseInt(e.target.value) || 0;
+      if(qty>0) state[id]=qty; else delete state[id];
+      renderOrder();
+    }
+
+    function renderOrder(){
+      const entries = Object.entries(state);
+      if(entries.length===0){ orderList.textContent='Belum ada item.'; grandTotalEl.textContent='0'; return; }
+      let html = '<ul>';
+      let grand = 0;
+      entries.forEach(([id, qty])=>{
+        const price = MENU.find(m=>m.id===id).price;
+        const total = price*qty; grand += total;
+        html += `<li>${id} × ${qty} = Rp ${currency(total)}</li>`;
+      });
+      html += '</ul>';
+      orderList.innerHTML = html;
+      grandTotalEl.textContent = currency(grand);
+    }
+
+    async function submitOrder(){
+      const nama = document.getElementById('nama').value.trim();
+      const wa = document.getElementById('wa').value.trim();
+      const fileInput = document.getElementById('bukti');
+      const webAppUrl = document.getElementById('webAppUrl').value;
+
+      if(!nama || !wa){ alert('Mohon isi nama dan nomor WA'); return; }
+      const order = Object.entries(state).map(([id,qty])=>({id,qty}));
+      if(order.length===0){ if(!confirm('Pesanan kosong. Lanjutkan?')) return; }
+
+      // Build form data
+      const fd = new FormData();
+      fd.append('nama', nama);
+      fd.append('whatsapp', wa);
+      fd.append('order', JSON.stringify(order));
+
+      if(fileInput.files.length>0){
+        fd.append('bukti', fileInput.files[0], fileInput.files[0].name);
+      }
+
+      if(!webAppUrl || webAppUrl.includes('REPLACE_WITH')){
+        downloadReceipt(nama, wa, order);
+        alert('Web App Google Apps Script belum dikonfigurasi. Resi akan diunduh sebagai berkas lokal. Ikuti instruksi README untuk menghubungkan Drive.');
+        return;
+      }
+
+      submitBtn.disabled = true; submitBtn.textContent='Mengirim...';
+      try{
+        const res = await fetch(webAppUrl, {method:'POST', body:fd});
+        const data = await res.json();
+        if(data.status==='ok'){
+          alert('Pesanan terkirim! Bukti disimpan.');
+          document.getElementById('orderForm').reset();
+          Object.keys(state).forEach(k=>delete state[k]);
+          document.querySelectorAll('#menuGrid input[type=number]').forEach(i=>i.value=0);
+          renderOrder();
+        }else{
+          alert('Terjadi masalah: '+(data.message||JSON.stringify(data)));
+        }
+      }catch(err){
+        alert('Gagal mengirim: '+err.message);
+      }finally{ submitBtn.disabled=false; submitBtn.textContent='Kirim Pesanan'; }
+    }
+
+    function downloadReceipt(nama, wa, order){
+      let text = 'Resi Pemesanan\\nNama: '+nama+'\\nWA: '+wa+'\\n\\n';
+      let total = 0;
+      order.forEach(o=>{
+        const price = MENU.find(m=>m.id===o.id).price;
+        const t = price*o.qty; total += t;
+        text += `${o.id} x ${o.qty} = Rp ${currency(t)}\\n`;
+      });
+      text += '\\nTotal: Rp '+currency(total)+'\\n\\nTerima kasih.';
+      const blob = new Blob([text], {type:'text/plain'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download='resi_pesanan.txt'; a.click(); URL.revokeObjectURL(url);
+    }
+
+    submitBtn.addEventListener('click', submitOrder);
+    renderMenu();
+    renderOrder();
+  </script>
+</body>
+</html>
