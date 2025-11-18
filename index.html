@@ -5,123 +5,169 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Pesan Online - Warung Mie</title>
   <style>
-    body{font-family:Inter,system-ui,Arial;background:#f7fafc;margin:0;color:#111}
-    .container{max-width:960px;margin:28px auto;padding:20px;background:#fff;border-radius:12px;box-shadow:0 6px 24px rgba(16,24,40,.08)}
-    h1{font-size:24px;margin:0 0 10px}
-    .menu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:18px}
-    .card{border:1px solid #e6eef6;padding:12px;border-radius:8px}
-    label{display:block;font-size:13px;margin-bottom:6px}
-    input[type=number]{width:80px;padding:6px;border-radius:6px;border:1px solid #dbeafe}
-    .row{display:flex;gap:12px;align-items:center}
-    .summary{margin-top:18px;padding:12px;border-radius:8px;background:#f1f5f9}
-    .btn{display:inline-block;padding:10px 14px;border-radius:8px;border:0;background:#0ea5a4;color:#fff;cursor:pointer}
-    .muted{color:#666;font-size:13px}
-    .form-row{margin-top:12px}
-    .fullwidth{width:100%;padding:10px;border-radius:8px;border:1px solid #e2e8f0}
-    .small{font-size:13px}
-    footer{margin-top:18px;color:#888;font-size:13px}
-    .note{background:#fffbea;padding:8px;border-radius:6px;border:1px solid #f5e8b4;margin-top:12px}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+    .container{max-width:1000px;margin:0 auto;padding:30px;background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+    .header{text-align:center;margin-bottom:30px;padding-bottom:20px;border-bottom:2px solid #f0f0f0}
+    h1{font-size:32px;color:#333;margin-bottom:8px}
+    .subtitle{color:#666;font-size:16px}
+    .section-title{font-size:20px;color:#333;margin:25px 0 15px;padding-bottom:8px;border-bottom:2px solid #667eea}
+    .menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-top:20px}
+    .card{border:2px solid #e0e7ff;padding:16px;border-radius:12px;transition:all .3s;background:#fafbff}
+    .card:hover{border-color:#667eea;transform:translateY(-2px);box-shadow:0 4px 12px rgba(102,126,234,.2)}
+    .card-title{font-weight:600;font-size:15px;color:#333;margin-bottom:4px}
+    .card-price{color:#667eea;font-size:14px;font-weight:600;margin-bottom:12px}
+    .qty-control{display:flex;align-items:center;gap:8px}
+    .qty-control label{font-size:13px;color:#666}
+    .qty-control input{width:70px;padding:8px;border-radius:8px;border:2px solid #e0e7ff;text-align:center;font-size:14px}
+    .qty-control input:focus{outline:none;border-color:#667eea}
+    .summary{margin-top:30px;padding:20px;border-radius:12px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff}
+    .summary h3{font-size:18px;margin-bottom:12px}
+    .summary-content{background:rgba(255,255,255,.15);padding:15px;border-radius:8px;backdrop-filter:blur(10px)}
+    .order-item{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.2);font-size:14px}
+    .order-item:last-child{border:0}
+    .total-row{font-size:20px;font-weight:700;margin-top:12px;padding-top:12px;border-top:2px solid rgba(255,255,255,.3)}
+    .form-section{margin-top:30px}
+    .form-group{margin-bottom:20px}
+    .form-label{display:block;font-size:14px;color:#333;font-weight:600;margin-bottom:8px}
+    .form-label .required{color:#ef4444;font-weight:700}
+    .form-input{width:100%;padding:12px;border-radius:8px;border:2px solid #e0e7ff;font-size:14px;transition:border .3s}
+    .form-input:focus{outline:none;border-color:#667eea}
+    .form-input.error{border-color:#ef4444;background:#fee}
+    .file-preview{margin-top:10px;padding:10px;background:#f0f9ff;border-radius:8px;font-size:13px;color:#0c4a6e;display:none}
+    .file-preview.show{display:block}
+    .btn{display:inline-block;padding:14px 32px;border-radius:10px;border:0;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;cursor:pointer;font-size:16px;font-weight:600;transition:all .3s;width:100%;margin-top:10px}
+    .btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 20px rgba(102,126,234,.4)}
+    .btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+    .note{background:#fff9e6;padding:16px;border-radius:10px;border-left:4px solid #fbbf24;margin-top:20px;font-size:14px;color:#92400e}
+    .note-title{font-weight:700;margin-bottom:8px;color:#78350f}
+    .warning-box{background:#fee2e2;padding:16px;border-radius:10px;border-left:4px solid #ef4444;margin-top:15px;font-size:14px;color:#991b1b}
+    .warning-box strong{display:block;margin-bottom:5px}
+    .alert-success{background:#d1fae5;color:#065f46;padding:12px;border-radius:8px;margin-top:15px;border-left:4px solid #10b981}
+    .alert-error{background:#fee2e2;color:#991b1b;padding:12px;border-radius:8px;margin-top:15px;border-left:4px solid #ef4444}
+    .empty-order{color:rgba(255,255,255,.8);font-style:italic;font-size:14px}
+    .help-text{font-size:12px;color:#666;margin-top:5px}
+    @media(max-width:640px){
+      .container{padding:20px}
+      h1{font-size:24px}
+      .menu-grid{grid-template-columns:1fr}
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Pesan Online - Warung Mie</h1>
-    <p class="muted">Pilih menu, masukkan jumlah. Total akan otomatis terhitung. Unggah bukti pembayaran — file akan disimpan ke Google Drive.</p>
+    <div class="header">
+      <h1>🍜 Warung Mie - Pesan Online</h1>
+      <p class="subtitle">Pilih menu favorit Anda dan pesan sekarang!</p>
+    </div>
 
+    <h2 class="section-title">📋 Menu Tersedia</h2>
     <div class="menu-grid" id="menuGrid"></div>
 
     <div class="summary">
-      <h3>Ringkasan Pesanan</h3>
-      <div id="orderList" class="muted">Belum ada item.</div>
-      <div style="margin-top:10px">
-        <strong>Total: Rp <span id="grandTotal">0</span></strong>
+      <h3>🛒 Ringkasan Pesanan Anda</h3>
+      <div class="summary-content">
+        <div id="orderList" class="empty-order">Belum ada item dipilih</div>
+        <div class="total-row">
+          Total: <span id="grandTotal">Rp 0</span>
+        </div>
       </div>
     </div>
 
-    <form id="orderForm" class="form-row" method="post" enctype="multipart/form-data">
-      <label class="small">Nama Pemesan</label>
-      <input type="text" name="nama" id="nama" class="fullwidth" required />
-
-      <label class="small">Nomor WhatsApp</label>
-      <input type="tel" name="whatsapp" id="wa" class="fullwidth" placeholder="08xxxxxxxx" required />
-
-      <label class="small">Unggah Bukti Pembayaran (opsional)</label>
-      <input type="file" name="bukti" id="bukti" class="fullwidth" accept="image/*,application/pdf" />
-
-      <!-- GANTI nilai berikut dengan URL Web App Google Apps Script Anda  REPLACE_WITH_YOUR_WEB_APP_URL-->
-      <input type="hidden" name="web_app_url" id="webAppUrl" value="https://script.google.com/macros/s/AKfycbx0Rn9fw8pvl3BtUrMv5tM8pusldsK0kZzPZf0fxMDGCZffuGIvnjnKFMozDLDhB7lH-w/exec" />
-
-      <div style="margin-top:12px">
-        <button type="button" class="btn" id="submitBtn">Kirim Pesanan</button>
+    <form id="orderForm" class="form-section">
+      <h2 class="section-title">👤 Informasi Pemesan</h2>
+      
+      <div class="form-group">
+        <label class="form-label">Nama Lengkap <span class="required">*</span></label>
+        <input type="text" name="nama" id="nama" class="form-input" placeholder="Masukkan nama lengkap Anda" required />
+        <div class="help-text">Contoh: Budi Santoso</div>
       </div>
+
+      <div class="form-group">
+        <label class="form-label">Nomor WhatsApp <span class="required">*</span></label>
+        <input type="tel" name="whatsapp" id="wa" class="form-input" placeholder="08xxxxxxxxxx" required pattern="08[0-9]{8,11}" />
+        <div class="help-text">Format: 08xxxxxxxxxx (dimulai dengan 08)</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">📸 Upload Bukti Pembayaran <span class="required">*</span></label>
+        <input type="file" name="bukti" id="bukti" class="form-input" accept="image/jpeg,image/jpg,image/png,application/pdf" required />
+        <div class="help-text">Format: JPG, PNG, atau PDF (Maksimal 5MB) - <strong>WAJIB DIISI</strong></div>
+        <div id="filePreview" class="file-preview"></div>
+      </div>
+
+      <div class="warning-box">
+        <strong>⚠️ PERHATIAN:</strong>
+        Semua field bertanda <span class="required">*</span> WAJIB diisi, termasuk bukti pembayaran. Pesanan tidak akan dikirim jika ada yang kosong.
+      </div>
+
+      <input type="hidden" name="web_app_url" id="webAppUrl" value="https://script.google.com/macros/s/AKfycbyz4fnqITdbXML9NxSg3OYAHAfxD6ru-MUZ4-KK81JEFaE3dAvsTwzn365Nbsw3gJ_ZHw/exec" />
+
+      <button type="button" class="btn" id="submitBtn">
+        <span id="btnText">🚀 Kirim Pesanan</span>
+      </button>
     </form>
 
+    <div id="alertBox"></div>
+
     <div class="note">
-      <strong>Catatan:</strong> Untuk menyimpan bukti otomatis ke Google Drive Anda perlu:
-      <ol>
-        <li>Membuat folder di Drive, dapatkan folder ID</li>
-        <li>Membuat Google Apps Script Web App (Code.gs) dan deploy</li>
-        <li>Isi URL Web App pada halaman ini</li>
-      </ol>
+      <div class="note-title">💳 Informasi Pembayaran</div>
+      <p><strong>Transfer ke rekening:</strong><br>
+      BCA: <strong>1234567890</strong><br>
+      a.n. <strong>Warung Mie</strong></p>
+      <p style="margin-top:10px">Setelah transfer, <strong>WAJIB</strong> upload bukti pembayaran sebelum mengirim pesanan.</p>
     </div>
-
-    <hr />
-    <h4>Daftar menu & harga</h4>
-    <pre style="white-space:pre-wrap">Mie Hompimpa Lv1 - Rp 15.000
-Mie Hompimpa Lv3 - Rp 15.000
-Mie Gacoan Lv0 - Rp 15.000
-Mie Gacoan Lv1 - Rp 15.000
-Mie Gacoan Lv2 - Rp 15.000
-Mie Gacoan Lv3 - Rp 15.000
-Mie Gacoan Lv4 - Rp 15.000
-Mie Gacoan Lv6 - Rp 15.000
-Udang Keju - Rp 12.000
-Udang Rambutan - Rp 12.000
-Pangsit Goreng - Rp 14.000
-Siomay - Rp 13.000
-Lumpia Udang - Rp 13.000
-Lemon Tea - Rp 8.000
-Tea - Rp 6.000
-Es Gobak Sodor - Rp 16.000</pre>
-
   </div>
 
   <script>
-    // Menu data
+    // Menu data with prices
     const MENU = [
-      {id:'Mie Hompimpa Lv1', price:15000},
-      {id:'Mie Hompimpa Lv3', price:15000},
-      {id:'Mie Gacoan Lv0', price:15000},
-      {id:'Mie Gacoan Lv1', price:15000},
-      {id:'Mie Gacoan Lv2', price:15000},
-      {id:'Mie Gacoan Lv3', price:15000},
-      {id:'Mie Gacoan Lv4', price:15000},
-      {id:'Mie Gacoan Lv6', price:15000},
-      {id:'Udang Keju', price:12000},
-      {id:'Udang Rambutan', price:12000},
-      {id:'Pangsit Goreng', price:14000},
-      {id:'Siomay', price:13000},
-      {id:'Lumpia Udang', price:13000},
-      {id:'Lemon Tea', price:8000},
-      {id:'Tea', price:6000},
-      {id:'Es Gobak Sodor', price:16000}
+      {id:'Mie Hompimpa Lv1', price:15000, category:'mie'},
+      {id:'Mie Hompimpa Lv3', price:15000, category:'mie'},
+      {id:'Mie Gacoan Lv0', price:15000, category:'mie'},
+      {id:'Mie Gacoan Lv1', price:15000, category:'mie'},
+      {id:'Mie Gacoan Lv2', price:15000, category:'mie'},
+      {id:'Mie Gacoan Lv3', price:15000, category:'mie'},
+      {id:'Mie Gacoan Lv4', price:15000, category:'mie'},
+      {id:'Mie Gacoan Lv6', price:15000, category:'mie'},
+      {id:'Udang Keju', price:12000, category:'dimsum'},
+      {id:'Udang Rambutan', price:12000, category:'dimsum'},
+      {id:'Pangsit Goreng', price:14000, category:'dimsum'},
+      {id:'Siomay', price:13000, category:'dimsum'},
+      {id:'Lumpia Udang', price:13000, category:'dimsum'},
+      {id:'Lemon Tea', price:8000, category:'drink'},
+      {id:'Tea', price:6000, category:'drink'},
+      {id:'Es Gobak Sodor', price:16000, category:'drink'}
     ];
-
-    const menuGrid = document.getElementById('menuGrid');
-    const orderList = document.getElementById('orderList');
-    const grandTotalEl = document.getElementById('grandTotal');
-    const submitBtn = document.getElementById('submitBtn');
 
     const state = {};
 
-    function currency(num){ return (num).toLocaleString('id-ID'); }
+    function currency(num){ 
+      return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0
+      }).format(num);
+    }
 
     function renderMenu(){
+      const menuGrid = document.getElementById('menuGrid');
+      menuGrid.innerHTML = '';
+      
       MENU.forEach(item=>{
-        const card = document.createElement('div');card.className='card';
-        card.innerHTML = `<div style="font-weight:600">${item.id}</div><div class="muted">Rp ${currency(item.price)}</div><div class="row" style="margin-top:8px"><label>Qty</label><input type=number min=0 value=0 data-id="${item.id}" style="margin-left:8px" /></div>`;
+        const card = document.createElement('div');
+        card.className='card';
+        card.innerHTML = `
+          <div class="card-title">${item.id}</div>
+          <div class="card-price">${currency(item.price)}</div>
+          <div class="qty-control">
+            <label>Jumlah:</label>
+            <input type="number" min="0" max="99" value="0" data-id="${item.id}" />
+          </div>
+        `;
         menuGrid.appendChild(card);
       });
+      
       menuGrid.querySelectorAll('input[type=number]').forEach(inp=>{
         inp.addEventListener('input', onQtyChange);
       });
@@ -135,18 +181,67 @@ Es Gobak Sodor - Rp 16.000</pre>
     }
 
     function renderOrder(){
+      const orderList = document.getElementById('orderList');
+      const grandTotalEl = document.getElementById('grandTotal');
       const entries = Object.entries(state);
-      if(entries.length===0){ orderList.textContent='Belum ada item.'; grandTotalEl.textContent='0'; return; }
-      let html = '<ul>';
+      
+      if(entries.length===0){
+        orderList.innerHTML = '<div class="empty-order">Belum ada item dipilih</div>';
+        grandTotalEl.textContent = 'Rp 0';
+        return;
+      }
+      
+      let html = '';
       let grand = 0;
+      
       entries.forEach(([id, qty])=>{
-        const price = MENU.find(m=>m.id===id).price;
-        const total = price*qty; grand += total;
-        html += `<li>${id} × ${qty} = Rp ${currency(total)}</li>`;
+        const menuItem = MENU.find(m=>m.id===id);
+        const total = menuItem.price * qty;
+        grand += total;
+        html += `<div class="order-item">${id} × ${qty} = ${currency(total)}</div>`;
       });
-      html += '</ul>';
+      
       orderList.innerHTML = html;
       grandTotalEl.textContent = currency(grand);
+    }
+
+    function showAlert(message, type='success'){
+      const alertBox = document.getElementById('alertBox');
+      const alertClass = type === 'success' ? 'alert-success' : 'alert-error';
+      alertBox.innerHTML = `<div class="${alertClass}">${message}</div>`;
+      setTimeout(()=>{ alertBox.innerHTML = ''; }, 6000);
+      
+      // Scroll to alert
+      alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // File preview
+    document.getElementById('bukti').addEventListener('change', function(e){
+      const file = e.target.files[0];
+      const preview = document.getElementById('filePreview');
+      
+      if(file){
+        const size = (file.size / 1024 / 1024).toFixed(2);
+        preview.innerHTML = `✓ File dipilih: <strong>${file.name}</strong> (${size} MB)`;
+        preview.classList.add('show');
+        
+        // Remove error state
+        e.target.classList.remove('error');
+      } else {
+        preview.classList.remove('show');
+      }
+    });
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64 = reader.result.split(',')[1];
+          resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
     }
 
     async function submitOrder(){
@@ -154,62 +249,138 @@ Es Gobak Sodor - Rp 16.000</pre>
       const wa = document.getElementById('wa').value.trim();
       const fileInput = document.getElementById('bukti');
       const webAppUrl = document.getElementById('webAppUrl').value;
+      const submitBtn = document.getElementById('submitBtn');
+      const btnText = document.getElementById('btnText');
 
-      if(!nama || !wa){ alert('Mohon isi nama dan nomor WA'); return; }
-      const order = Object.entries(state).map(([id,qty])=>({id,qty}));
-      if(order.length===0){ if(!confirm('Pesanan kosong. Lanjutkan?')) return; }
+      // Reset error states
+      document.getElementById('nama').classList.remove('error');
+      document.getElementById('wa').classList.remove('error');
+      document.getElementById('bukti').classList.remove('error');
 
-      // Build form data
-      const fd = new FormData();
-      fd.append('nama', nama);
-      fd.append('whatsapp', wa);
-      fd.append('order', JSON.stringify(order));
-
-      if(fileInput.files.length>0){
-        fd.append('bukti', fileInput.files[0], fileInput.files[0].name);
+      // VALIDASI 1: Nama wajib diisi
+      if(!nama || nama === ''){ 
+        document.getElementById('nama').classList.add('error');
+        showAlert('❌ Nama pemesan wajib diisi!', 'error'); 
+        document.getElementById('nama').focus();
+        return; 
       }
 
-      if(!webAppUrl || webAppUrl.includes('REPLACE_WITH')){
-        downloadReceipt(nama, wa, order);
-        alert('Web App Google Apps Script belum dikonfigurasi. Resi akan diunduh sebagai berkas lokal. Ikuti instruksi README untuk menghubungkan Drive.');
+      // VALIDASI 2: WhatsApp wajib diisi dan format benar
+      if(!wa || wa === ''){ 
+        document.getElementById('wa').classList.add('error');
+        showAlert('❌ Nomor WhatsApp wajib diisi!', 'error'); 
+        document.getElementById('wa').focus();
+        return; 
+      }
+
+      if(!/^08\d{8,11}$/.test(wa)){
+        document.getElementById('wa').classList.add('error');
+        showAlert('❌ Format nomor WhatsApp tidak valid! Harus dimulai dengan 08 dan 10-13 digit', 'error');
+        document.getElementById('wa').focus();
         return;
       }
 
-      submitBtn.disabled = true; submitBtn.textContent='Mengirim...';
+      // VALIDASI 3: Pesanan tidak boleh kosong
+      const order = Object.entries(state).map(([id,qty])=>({id,qty}));
+      if(order.length===0){ 
+        showAlert('❌ Pesanan kosong! Pilih menu terlebih dahulu', 'error');
+        window.scrollTo({top: 0, behavior: 'smooth'});
+        return; 
+      }
+
+      // VALIDASI 4: Bukti bayar WAJIB ada
+      if(fileInput.files.length === 0){
+        document.getElementById('bukti').classList.add('error');
+        showAlert('❌ Bukti pembayaran WAJIB diupload! Silakan pilih file gambar atau PDF', 'error');
+        fileInput.focus();
+        return;
+      }
+
+      const file = fileInput.files[0];
+
+      // VALIDASI 5: Ukuran file
+      if(file.size > 5 * 1024 * 1024){
+        document.getElementById('bukti').classList.add('error');
+        showAlert('❌ Ukuran file terlalu besar! Maksimal 5MB', 'error');
+        return;
+      }
+
+      // VALIDASI 6: Tipe file
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+      if(!allowedTypes.includes(file.type)){
+        document.getElementById('bukti').classList.add('error');
+        showAlert('❌ Format file tidak didukung! Gunakan JPG, PNG, atau PDF', 'error');
+        return;
+      }
+
+      // VALIDASI 7: Web App URL harus sudah dikonfigurasi
+      if(!webAppUrl || webAppUrl.includes('PASTE_WEB_APP_URL_HERE')){
+        showAlert('❌ Web App belum dikonfigurasi. Hubungi administrator.', 'error');
+        return;
+      }
+
+      // Konfirmasi final
+      if(!confirm(`Kirim pesanan atas nama ${nama}?\n\nTotal: ${document.getElementById('grandTotal').textContent}\nBukti: ${file.name}`)){
+        return;
+      }
+
+      // Start submission
+      submitBtn.disabled = true;
+      btnText.textContent = '⏳ Memproses...';
+      
       try{
-        const res = await fetch(webAppUrl, {method:'POST', body:fd});
+        const fd = new FormData();
+        fd.append('nama', nama);
+        fd.append('whatsapp', wa);
+        fd.append('order', JSON.stringify(order));
+
+        btnText.textContent = '📤 Mengupload bukti...';
+        const base64Data = await fileToBase64(file);
+        fd.append('bukti', base64Data);
+        fd.append('buktiName', file.name);
+        fd.append('buktiType', file.type);
+
+        btnText.textContent = '💾 Menyimpan pesanan...';
+        const res = await fetch(webAppUrl, {
+          method: 'POST', 
+          body: fd
+        });
+        
         const data = await res.json();
-        if(data.status==='ok'){
-          alert('Pesanan terkirim! Bukti disimpan.');
+        
+        if(data.status === 'ok'){
+          showAlert('✅ Pesanan berhasil dikirim!<br>📸 Bukti pembayaran tersimpan<br>📊 Data tersimpan di spreadsheet', 'success');
+          
+          // Reset form
           document.getElementById('orderForm').reset();
+          document.getElementById('filePreview').classList.remove('show');
           Object.keys(state).forEach(k=>delete state[k]);
           document.querySelectorAll('#menuGrid input[type=number]').forEach(i=>i.value=0);
           renderOrder();
-        }else{
-          alert('Terjadi masalah: '+(data.message||JSON.stringify(data)));
+          
+          // Scroll to top
+          window.scrollTo({top: 0, behavior: 'smooth'});
+        } else {
+          showAlert('❌ ' + (data.message || 'Terjadi kesalahan saat mengirim pesanan'), 'error');
         }
-      }catch(err){
-        alert('Gagal mengirim: '+err.message);
-      }finally{ submitBtn.disabled=false; submitBtn.textContent='Kirim Pesanan'; }
+      } catch(err){
+        console.error('Submit error:', err);
+        showAlert('❌ Gagal mengirim pesanan: ' + err.message + '<br>Periksa koneksi internet Anda', 'error');
+      } finally { 
+        submitBtn.disabled = false;
+        btnText.textContent = '🚀 Kirim Pesanan';
+      }
     }
 
-    function downloadReceipt(nama, wa, order){
-      let text = 'Resi Pemesanan\\nNama: '+nama+'\\nWA: '+wa+'\\n\\n';
-      let total = 0;
-      order.forEach(o=>{
-        const price = MENU.find(m=>m.id===o.id).price;
-        const t = price*o.qty; total += t;
-        text += `${o.id} x ${o.qty} = Rp ${currency(t)}\\n`;
-      });
-      text += '\\nTotal: Rp '+currency(total)+'\\n\\nTerima kasih.';
-      const blob = new Blob([text], {type:'text/plain'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href=url; a.download='resi_pesanan.txt'; a.click(); URL.revokeObjectURL(url);
-    }
-
-    submitBtn.addEventListener('click', submitOrder);
+    // Initialize
+    document.getElementById('submitBtn').addEventListener('click', submitOrder);
     renderMenu();
     renderOrder();
+
+    // Prevent default form submission
+    document.getElementById('orderForm').addEventListener('submit', function(e){
+      e.preventDefault();
+    });
   </script>
 </body>
 </html>
