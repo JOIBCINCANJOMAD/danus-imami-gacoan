@@ -8,9 +8,16 @@
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
     .container{max-width:1000px;margin:0 auto;padding:30px;background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+    .closed-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.95);z-index:9999;display:none;align-items:center;justify-content:center}
+    .closed-overlay.show{display:flex}
+    .closed-message{text-align:center;color:#fff;padding:40px}
+    .closed-message h1{font-size:48px;margin-bottom:20px}
+    .closed-message p{font-size:20px;margin-bottom:10px}
+    .clock{font-size:64px;font-weight:700;color:#fbbf24;margin:30px 0}
     .header{text-align:center;margin-bottom:30px;padding-bottom:20px;border-bottom:2px solid #f0f0f0}
     h1{font-size:32px;color:#333;margin-bottom:8px}
     .subtitle{color:#666;font-size:16px}
+    .operating-hours{background:#fffbea;padding:12px;border-radius:8px;margin-top:10px;font-size:14px;color:#92400e;text-align:center}
     .section-title{font-size:20px;color:#333;margin:25px 0 15px;padding-bottom:8px;border-bottom:2px solid #667eea}
     .menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-top:20px}
     .card{border:2px solid #e0e7ff;padding:16px;border-radius:12px;transition:all .3s;background:#fafbff}
@@ -39,26 +46,61 @@
     .btn{display:inline-block;padding:14px 32px;border-radius:10px;border:0;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;cursor:pointer;font-size:16px;font-weight:600;transition:all .3s;width:100%;margin-top:10px}
     .btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 20px rgba(102,126,234,.4)}
     .btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+    .btn-clear{background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);margin-top:5px}
     .note{background:#fff9e6;padding:16px;border-radius:10px;border-left:4px solid #fbbf24;margin-top:20px;font-size:14px;color:#92400e}
     .note-title{font-weight:700;margin-bottom:8px;color:#78350f}
     .warning-box{background:#fee2e2;padding:16px;border-radius:10px;border-left:4px solid #ef4444;margin-top:15px;font-size:14px;color:#991b1b}
-    .warning-box strong{display:block;margin-bottom:5px}
-    .alert-success{background:#d1fae5;color:#065f46;padding:12px;border-radius:8px;margin-top:15px;border-left:4px solid #10b981}
-    .alert-error{background:#fee2e2;color:#991b1b;padding:12px;border-radius:8px;margin-top:15px;border-left:4px solid #ef4444}
+    .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center}
+    .modal.show{display:flex}
+    .modal-content{background:#fff;padding:30px;border-radius:16px;max-width:500px;text-align:center;animation:slideDown .3s}
+    @keyframes slideDown{from{transform:translateY(-50px);opacity:0}to{transform:translateY(0);opacity:1}}
+    .modal-icon{font-size:64px;margin-bottom:20px}
+    .modal-title{font-size:24px;font-weight:700;margin-bottom:10px;color:#333}
+    .modal-message{font-size:16px;color:#666;margin-bottom:20px;line-height:1.6}
+    .modal-details{background:#f3f4f6;padding:15px;border-radius:8px;margin-bottom:20px;text-align:left}
+    .modal-details div{margin:8px 0;font-size:14px}
+    .modal-btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:12px 32px;border:0;border-radius:8px;cursor:pointer;font-size:16px;font-weight:600}
     .empty-order{color:rgba(255,255,255,.8);font-style:italic;font-size:14px}
     .help-text{font-size:12px;color:#666;margin-top:5px}
-    @media(max-width:640px){
-      .container{padding:20px}
-      h1{font-size:24px}
-      .menu-grid{grid-template-columns:1fr}
-    }
+    .saved-indicator{display:inline-block;color:#10b981;font-size:12px;margin-left:10px;animation:fadeIn .3s}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    @media(max-width:640px){.container{padding:20px}h1{font-size:24px}.menu-grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
+  <!-- Closed Hours Overlay -->
+  <div id="closedOverlay" class="closed-overlay">
+    <div class="closed-message">
+      <h1>🌙 TUTUP</h1>
+      <p>Maaf, kami sedang tutup</p>
+      <div class="clock" id="currentClock">--:--</div>
+      <p><strong>Jam Operasional:</strong></p>
+      <p>06:00 - 18:00 WIB</p>
+      <p style="margin-top:20px;font-size:16px">Silakan kembali saat jam operasional</p>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div id="successModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-icon">✅</div>
+      <div class="modal-title">Pesanan Berhasil Dikirim!</div>
+      <div class="modal-message">
+        Terima kasih telah memesan di Warung Mie.<br>
+        Pesanan Anda telah tersimpan dengan aman.
+      </div>
+      <div class="modal-details" id="modalDetails"></div>
+      <button class="modal-btn" onclick="closeSuccessModal()">Tutup</button>
+    </div>
+  </div>
+
   <div class="container">
     <div class="header">
       <h1>🍜 Warung Mie - Pesan Online</h1>
       <p class="subtitle">Pilih menu favorit Anda dan pesan sekarang!</p>
+      <div class="operating-hours">
+        ⏰ Jam Operasional: 06:00 - 18:00 WIB
+      </div>
     </div>
 
     <h2 class="section-title">📋 Menu Tersedia</h2>
@@ -78,75 +120,160 @@
       <h2 class="section-title">👤 Informasi Pemesan</h2>
       
       <div class="form-group">
-        <label class="form-label">Nama Lengkap <span class="required">*</span></label>
+        <label class="form-label">
+          Nama Lengkap <span class="required">*</span>
+          <span id="namaSaved" class="saved-indicator" style="display:none">✓ Tersimpan</span>
+        </label>
         <input type="text" name="nama" id="nama" class="form-input" placeholder="Masukkan nama lengkap Anda" required />
-        <div class="help-text">Contoh: Budi Santoso</div>
+        <div class="help-text">Data akan tersimpan hingga pesanan terkirim</div>
       </div>
 
       <div class="form-group">
-        <label class="form-label">Nomor WhatsApp <span class="required">*</span></label>
+        <label class="form-label">
+          Nomor WhatsApp <span class="required">*</span>
+          <span id="waSaved" class="saved-indicator" style="display:none">✓ Tersimpan</span>
+        </label>
         <input type="tel" name="whatsapp" id="wa" class="form-input" placeholder="08xxxxxxxxxx" required pattern="08[0-9]{8,11}" />
         <div class="help-text">Format: 08xxxxxxxxxx (dimulai dengan 08)</div>
       </div>
 
       <div class="form-group">
-        <label class="form-label">📸 Upload Bukti Pembayaran <span class="required">*</span></label>
+        <label class="form-label">
+          📸 Upload Bukti Pembayaran <span class="required">*</span>
+          <span id="fileSaved" class="saved-indicator" style="display:none">✓ Tersimpan</span>
+        </label>
         <input type="file" name="bukti" id="bukti" class="form-input" accept="image/jpeg,image/jpg,image/png,application/pdf" required />
-        <div class="help-text">Format: JPG, PNG, atau PDF (Maksimal 5MB) - <strong>WAJIB DIISI</strong></div>
+        <div class="help-text">Format: JPG, PNG, atau PDF (Max 5MB) - WAJIB</div>
         <div id="filePreview" class="file-preview"></div>
       </div>
 
       <div class="warning-box">
         <strong>⚠️ PERHATIAN:</strong>
-        Semua field bertanda <span class="required">*</span> WAJIB diisi, termasuk bukti pembayaran. Pesanan tidak akan dikirim jika ada yang kosong.
+        Semua field bertanda <span class="required">*</span> WAJIB diisi. Data akan tersimpan otomatis dan tidak akan hilang meski Anda refresh halaman.
       </div>
 
-      <input type="hidden" name="web_app_url" id="webAppUrl" value="https://script.google.com/macros/s/AKfycbyz4fnqITdbXML9NxSg3OYAHAfxD6ru-MUZ4-KK81JEFaE3dAvsTwzn365Nbsw3gJ_ZHw/exec" />
+      <input type="hidden" id="webAppUrl" value="PASTE_WEB_APP_URL_HERE" />
 
       <button type="button" class="btn" id="submitBtn">
         <span id="btnText">🚀 Kirim Pesanan</span>
       </button>
+      
+      <button type="button" class="btn btn-clear" id="clearBtn">
+        🗑️ Hapus Semua Data
+      </button>
     </form>
-
-    <div id="alertBox"></div>
 
     <div class="note">
       <div class="note-title">💳 Informasi Pembayaran</div>
       <p><strong>Transfer ke rekening:</strong><br>
       BCA: <strong>1234567890</strong><br>
       a.n. <strong>Warung Mie</strong></p>
-      <p style="margin-top:10px">Setelah transfer, <strong>WAJIB</strong> upload bukti pembayaran sebelum mengirim pesanan.</p>
+      <p style="margin-top:10px">Setelah transfer, <strong>WAJIB</strong> upload bukti pembayaran.</p>
     </div>
   </div>
 
   <script>
-    // Menu data with prices
     const MENU = [
-      {id:'Mie Hompimpa Lv1', price:15000, category:'mie'},
-      {id:'Mie Hompimpa Lv3', price:15000, category:'mie'},
-      {id:'Mie Gacoan Lv0', price:15000, category:'mie'},
-      {id:'Mie Gacoan Lv1', price:15000, category:'mie'},
-      {id:'Mie Gacoan Lv2', price:15000, category:'mie'},
-      {id:'Mie Gacoan Lv3', price:15000, category:'mie'},
-      {id:'Mie Gacoan Lv4', price:15000, category:'mie'},
-      {id:'Mie Gacoan Lv6', price:15000, category:'mie'},
-      {id:'Udang Keju', price:12000, category:'dimsum'},
-      {id:'Udang Rambutan', price:12000, category:'dimsum'},
-      {id:'Pangsit Goreng', price:14000, category:'dimsum'},
-      {id:'Siomay', price:13000, category:'dimsum'},
-      {id:'Lumpia Udang', price:13000, category:'dimsum'},
-      {id:'Lemon Tea', price:8000, category:'drink'},
-      {id:'Tea', price:6000, category:'drink'},
-      {id:'Es Gobak Sodor', price:16000, category:'drink'}
+      {id:'Mie Hompimpa Lv1', price:15000}, {id:'Mie Hompimpa Lv3', price:15000},
+      {id:'Mie Gacoan Lv0', price:15000}, {id:'Mie Gacoan Lv1', price:15000},
+      {id:'Mie Gacoan Lv2', price:15000}, {id:'Mie Gacoan Lv3', price:15000},
+      {id:'Mie Gacoan Lv4', price:15000}, {id:'Mie Gacoan Lv6', price:15000},
+      {id:'Udang Keju', price:12000}, {id:'Udang Rambutan', price:12000},
+      {id:'Pangsit Goreng', price:14000}, {id:'Siomay', price:13000},
+      {id:'Lumpia Udang', price:13000}, {id:'Lemon Tea', price:8000},
+      {id:'Tea', price:6000}, {id:'Es Gobak Sodor', price:16000}
     ];
 
     const state = {};
+    let savedFile = null;
 
+    // ============ OPERATING HOURS CHECK ============
+    function checkOperatingHours() {
+      const now = new Date();
+      const hours = now.getHours();
+      const isOpen = hours >= 6 && hours < 18;
+      
+      document.getElementById('closedOverlay').classList.toggle('show', !isOpen);
+      
+      if (!isOpen) {
+        const timeStr = now.toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+        document.getElementById('currentClock').textContent = timeStr;
+      }
+      
+      return isOpen;
+    }
+
+    // Update clock every second
+    setInterval(() => {
+      if (!checkOperatingHours()) {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+        document.getElementById('currentClock').textContent = timeStr;
+      }
+    }, 1000);
+
+    // Initial check
+    if (!checkOperatingHours()) {
+      // Block all interactions when closed
+      document.body.style.overflow = 'hidden';
+    }
+
+    // ============ LOCAL STORAGE FUNCTIONS ============
+    function saveToStorage() {
+      try {
+        localStorage.setItem('warungmie_order', JSON.stringify(state));
+        localStorage.setItem('warungmie_nama', document.getElementById('nama').value);
+        localStorage.setItem('warungmie_wa', document.getElementById('wa').value);
+        
+        // Show saved indicators
+        if (document.getElementById('nama').value) {
+          document.getElementById('namaSaved').style.display = 'inline-block';
+          setTimeout(() => document.getElementById('namaSaved').style.display = 'none', 2000);
+        }
+        if (document.getElementById('wa').value) {
+          document.getElementById('waSaved').style.display = 'inline-block';
+          setTimeout(() => document.getElementById('waSaved').style.display = 'none', 2000);
+        }
+      } catch (e) {
+        console.warn('LocalStorage not available');
+      }
+    }
+
+    function loadFromStorage() {
+      try {
+        const savedOrder = localStorage.getItem('warungmie_order');
+        const savedNama = localStorage.getItem('warungmie_nama');
+        const savedWa = localStorage.getItem('warungmie_wa');
+        
+        if (savedOrder) {
+          Object.assign(state, JSON.parse(savedOrder));
+          // Restore quantity inputs
+          Object.entries(state).forEach(([id, qty]) => {
+            const input = document.querySelector(`input[data-id="${id}"]`);
+            if (input) input.value = qty;
+          });
+          renderOrder();
+        }
+        
+        if (savedNama) document.getElementById('nama').value = savedNama;
+        if (savedWa) document.getElementById('wa').value = savedWa;
+      } catch (e) {
+        console.warn('Failed to load from storage');
+      }
+    }
+
+    function clearStorage() {
+      try {
+        localStorage.removeItem('warungmie_order');
+        localStorage.removeItem('warungmie_nama');
+        localStorage.removeItem('warungmie_wa');
+      } catch (e) {}
+    }
+
+    // ============ UI FUNCTIONS ============
     function currency(num){ 
       return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0
+        style: 'currency', currency: 'IDR', minimumFractionDigits: 0
       }).format(num);
     }
 
@@ -178,6 +305,7 @@
       const qty = parseInt(e.target.value) || 0;
       if(qty>0) state[id]=qty; else delete state[id];
       renderOrder();
+      saveToStorage();
     }
 
     function renderOrder(){
@@ -205,29 +333,22 @@
       grandTotalEl.textContent = currency(grand);
     }
 
-    function showAlert(message, type='success'){
-      const alertBox = document.getElementById('alertBox');
-      const alertClass = type === 'success' ? 'alert-success' : 'alert-error';
-      alertBox.innerHTML = `<div class="${alertClass}">${message}</div>`;
-      setTimeout(()=>{ alertBox.innerHTML = ''; }, 6000);
-      
-      // Scroll to alert
-      alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-
-    // File preview
+    // ============ FILE HANDLING ============
     document.getElementById('bukti').addEventListener('change', function(e){
       const file = e.target.files[0];
       const preview = document.getElementById('filePreview');
       
       if(file){
+        savedFile = file;
         const size = (file.size / 1024 / 1024).toFixed(2);
         preview.innerHTML = `✓ File dipilih: <strong>${file.name}</strong> (${size} MB)`;
         preview.classList.add('show');
-        
-        // Remove error state
         e.target.classList.remove('error');
+        
+        document.getElementById('fileSaved').style.display = 'inline-block';
+        setTimeout(() => document.getElementById('fileSaved').style.display = 'none', 2000);
       } else {
+        savedFile = null;
         preview.classList.remove('show');
       }
     });
@@ -235,98 +356,82 @@
     function fileToBase64(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = () => {
-          const base64 = reader.result.split(',')[1];
-          resolve(base64);
-        };
+        reader.onload = () => resolve(reader.result.split(',')[1]);
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
     }
 
+    // ============ SUCCESS MODAL ============
+    function showSuccessModal(data) {
+      const details = `
+        <div><strong>📦 Item:</strong> ${data.orderCount} item</div>
+        <div><strong>💰 Total:</strong> ${currency(data.totalAmount)}</div>
+        <div><strong>✅ Google Sheet:</strong> Tersimpan</div>
+        <div><strong>📸 Bukti Bayar:</strong> Tersimpan di Drive</div>
+      `;
+      document.getElementById('modalDetails').innerHTML = details;
+      document.getElementById('successModal').classList.add('show');
+    }
+
+    function closeSuccessModal() {
+      document.getElementById('successModal').classList.remove('show');
+    }
+
+    // ============ FORM SUBMISSION ============
     async function submitOrder(){
+      // Check operating hours
+      if (!checkOperatingHours()) {
+        alert('❌ Maaf, kami sedang tutup. Silakan pesan saat jam operasional (06:00 - 18:00 WIB)');
+        return;
+      }
+
       const nama = document.getElementById('nama').value.trim();
       const wa = document.getElementById('wa').value.trim();
-      const fileInput = document.getElementById('bukti');
       const webAppUrl = document.getElementById('webAppUrl').value;
       const submitBtn = document.getElementById('submitBtn');
       const btnText = document.getElementById('btnText');
 
-      // Reset error states
-      document.getElementById('nama').classList.remove('error');
-      document.getElementById('wa').classList.remove('error');
-      document.getElementById('bukti').classList.remove('error');
+      // Validations
+      document.querySelectorAll('.form-input').forEach(el => el.classList.remove('error'));
 
-      // VALIDASI 1: Nama wajib diisi
-      if(!nama || nama === ''){ 
+      if(!nama){ 
         document.getElementById('nama').classList.add('error');
-        showAlert('❌ Nama pemesan wajib diisi!', 'error'); 
-        document.getElementById('nama').focus();
+        alert('❌ Nama wajib diisi!');
         return; 
       }
 
-      // VALIDASI 2: WhatsApp wajib diisi dan format benar
-      if(!wa || wa === ''){ 
+      if(!wa || !/^08\d{8,11}$/.test(wa)){ 
         document.getElementById('wa').classList.add('error');
-        showAlert('❌ Nomor WhatsApp wajib diisi!', 'error'); 
-        document.getElementById('wa').focus();
-        return; 
-      }
-
-      if(!/^08\d{8,11}$/.test(wa)){
-        document.getElementById('wa').classList.add('error');
-        showAlert('❌ Format nomor WhatsApp tidak valid! Harus dimulai dengan 08 dan 10-13 digit', 'error');
-        document.getElementById('wa').focus();
+        alert('❌ Nomor WhatsApp tidak valid!');
         return;
       }
 
-      // VALIDASI 3: Pesanan tidak boleh kosong
       const order = Object.entries(state).map(([id,qty])=>({id,qty}));
       if(order.length===0){ 
-        showAlert('❌ Pesanan kosong! Pilih menu terlebih dahulu', 'error');
-        window.scrollTo({top: 0, behavior: 'smooth'});
+        alert('❌ Pilih menu terlebih dahulu!');
         return; 
       }
 
-      // VALIDASI 4: Bukti bayar WAJIB ada
-      if(fileInput.files.length === 0){
+      if(!savedFile){
         document.getElementById('bukti').classList.add('error');
-        showAlert('❌ Bukti pembayaran WAJIB diupload! Silakan pilih file gambar atau PDF', 'error');
-        fileInput.focus();
+        alert('❌ Bukti pembayaran WAJIB diupload!');
         return;
       }
 
-      const file = fileInput.files[0];
-
-      // VALIDASI 5: Ukuran file
-      if(file.size > 5 * 1024 * 1024){
-        document.getElementById('bukti').classList.add('error');
-        showAlert('❌ Ukuran file terlalu besar! Maksimal 5MB', 'error');
+      if(savedFile.size > 5 * 1024 * 1024){
+        alert('❌ File terlalu besar (max 5MB)!');
         return;
       }
 
-      // VALIDASI 6: Tipe file
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
-      if(!allowedTypes.includes(file.type)){
-        document.getElementById('bukti').classList.add('error');
-        showAlert('❌ Format file tidak didukung! Gunakan JPG, PNG, atau PDF', 'error');
-        return;
-      }
-
-      // VALIDASI 7: Web App URL harus sudah dikonfigurasi
-      if(!webAppUrl || webAppUrl.includes('PASTE_WEB_APP_URL_HERE')){
-        showAlert('❌ Web App belum dikonfigurasi. Hubungi administrator.', 'error');
-        return;
-      }
-
-      // Konfirmasi final
-      if(!confirm(`Kirim pesanan atas nama ${nama}?\n\nTotal: ${document.getElementById('grandTotal').textContent}\nBukti: ${file.name}`)){
+      if(!webAppUrl || webAppUrl.includes('PASTE')){
+        alert('❌ Web App belum dikonfigurasi!');
         return;
       }
 
       // Start submission
       submitBtn.disabled = true;
-      btnText.textContent = '⏳ Memproses...';
+      btnText.textContent = '⏳ Mengupload...';
       
       try{
         const fd = new FormData();
@@ -334,53 +439,67 @@
         fd.append('whatsapp', wa);
         fd.append('order', JSON.stringify(order));
 
-        btnText.textContent = '📤 Mengupload bukti...';
-        const base64Data = await fileToBase64(file);
+        const base64Data = await fileToBase64(savedFile);
         fd.append('bukti', base64Data);
-        fd.append('buktiName', file.name);
-        fd.append('buktiType', file.type);
+        fd.append('buktiName', savedFile.name);
+        fd.append('buktiType', savedFile.type);
 
-        btnText.textContent = '💾 Menyimpan pesanan...';
-        const res = await fetch(webAppUrl, {
-          method: 'POST', 
-          body: fd
-        });
-        
+        btnText.textContent = '💾 Menyimpan...';
+        const res = await fetch(webAppUrl, {method: 'POST', body: fd});
         const data = await res.json();
         
         if(data.status === 'ok'){
-          showAlert('✅ Pesanan berhasil dikirim!<br>📸 Bukti pembayaran tersimpan<br>📊 Data tersimpan di spreadsheet', 'success');
+          // Show success modal
+          showSuccessModal(data);
           
-          // Reset form
+          // Clear everything
+          clearStorage();
           document.getElementById('orderForm').reset();
           document.getElementById('filePreview').classList.remove('show');
           Object.keys(state).forEach(k=>delete state[k]);
           document.querySelectorAll('#menuGrid input[type=number]').forEach(i=>i.value=0);
+          savedFile = null;
           renderOrder();
           
-          // Scroll to top
           window.scrollTo({top: 0, behavior: 'smooth'});
         } else {
-          showAlert('❌ ' + (data.message || 'Terjadi kesalahan saat mengirim pesanan'), 'error');
+          alert('❌ ' + (data.message || 'Gagal mengirim'));
         }
       } catch(err){
-        console.error('Submit error:', err);
-        showAlert('❌ Gagal mengirim pesanan: ' + err.message + '<br>Periksa koneksi internet Anda', 'error');
+        console.error(err);
+        alert('❌ Error: ' + err.message);
       } finally { 
         submitBtn.disabled = false;
         btnText.textContent = '🚀 Kirim Pesanan';
       }
     }
 
-    // Initialize
-    document.getElementById('submitBtn').addEventListener('click', submitOrder);
-    renderMenu();
-    renderOrder();
+    function clearAllData(){
+      if(confirm('Hapus semua data pesanan?')){
+        clearStorage();
+        document.getElementById('orderForm').reset();
+        document.getElementById('filePreview').classList.remove('show');
+        Object.keys(state).forEach(k=>delete state[k]);
+        document.querySelectorAll('#menuGrid input[type=number]').forEach(i=>i.value=0);
+        savedFile = null;
+        renderOrder();
+        alert('✓ Semua data telah dihapus');
+      }
+    }
 
-    // Prevent default form submission
-    document.getElementById('orderForm').addEventListener('submit', function(e){
-      e.preventDefault();
-    });
+    // ============ AUTO-SAVE ============
+    document.getElementById('nama').addEventListener('input', saveToStorage);
+    document.getElementById('wa').addEventListener('input', saveToStorage);
+
+    // ============ EVENT LISTENERS ============
+    document.getElementById('submitBtn').addEventListener('click', submitOrder);
+    document.getElementById('clearBtn').addEventListener('click', clearAllData);
+    document.getElementById('orderForm').addEventListener('submit', e => e.preventDefault());
+
+    // ============ INITIALIZATION ============
+    renderMenu();
+    loadFromStorage();
+    renderOrder();
   </script>
 </body>
 </html>
