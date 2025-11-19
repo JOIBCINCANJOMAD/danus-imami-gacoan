@@ -54,12 +54,16 @@
     .modal.show{display:flex}
     .modal-content{background:#fff;padding:30px;border-radius:16px;max-width:500px;text-align:center;animation:slideDown .3s}
     @keyframes slideDown{from{transform:translateY(-50px);opacity:0}to{transform:translateY(0);opacity:1}}
-    .modal-icon{font-size:64px;margin-bottom:20px}
+    .modal-icon{font-size:64px;margin-bottom:20px;animation:scaleUp .5s}
+    @keyframes scaleUp{from{transform:scale(0)}to{transform:scale(1)}}
     .modal-title{font-size:24px;font-weight:700;margin-bottom:10px;color:#333}
     .modal-message{font-size:16px;color:#666;margin-bottom:20px;line-height:1.6}
     .modal-details{background:#f3f4f6;padding:15px;border-radius:8px;margin-bottom:20px;text-align:left}
     .modal-details div{margin:8px 0;font-size:14px}
-    .modal-btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:12px 32px;border:0;border-radius:8px;cursor:pointer;font-size:16px;font-weight:600}
+    .progress-bar{width:100%;height:4px;background:#e5e7eb;border-radius:2px;overflow:hidden;margin-top:20px}
+    .progress-fill{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);animation:fillProgress 3s linear}
+    @keyframes fillProgress{from{width:0}to{width:100%}}
+    .auto-close-text{font-size:12px;color:#999;margin-top:10px}
     .empty-order{color:rgba(255,255,255,.8);font-style:italic;font-size:14px}
     .help-text{font-size:12px;color:#666;margin-top:5px}
     .saved-indicator{display:inline-block;color:#10b981;font-size:12px;margin-left:10px;animation:fadeIn .3s}
@@ -80,7 +84,7 @@
     </div>
   </div>
 
-  <!-- Success Modal -->
+  <!-- Success Modal (Auto-Close) -->
   <div id="successModal" class="modal">
     <div class="modal-content">
       <div class="modal-icon">✅</div>
@@ -90,7 +94,10 @@
         Pesanan Anda telah tersimpan dengan aman.
       </div>
       <div class="modal-details" id="modalDetails"></div>
-      <button class="modal-btn" onclick="closeSuccessModal()">Tutup</button>
+      <div class="progress-bar">
+        <div class="progress-fill"></div>
+      </div>
+      <div class="auto-close-text">Halaman akan direset otomatis dalam 3 detik...</div>
     </div>
   </div>
 
@@ -125,7 +132,7 @@
           <span id="namaSaved" class="saved-indicator" style="display:none">✓ Tersimpan</span>
         </label>
         <input type="text" name="nama" id="nama" class="form-input" placeholder="Masukkan nama lengkap Anda" required />
-        <div class="help-text">Data akan tersimpan hingga pesanan terkirim</div>
+        <div class="help-text">Data tersimpan otomatis hingga pesanan terkirim</div>
       </div>
 
       <div class="form-group">
@@ -148,8 +155,12 @@
       </div>
 
       <div class="warning-box">
-        <strong>⚠️ PERHATIAN:</strong>
-        Semua field bertanda <span class="required">*</span> WAJIB diisi. Data akan tersimpan otomatis dan tidak akan hilang meski Anda refresh halaman.
+        <strong>⚠️ INFO PENTING:</strong>
+        <ul style="margin-top:8px;margin-left:20px">
+          <li>Semua data tersimpan otomatis hingga pesanan berhasil dikirim</li>
+          <li>Refresh halaman tidak akan menghilangkan data Anda</li>
+          <li>Setelah pesanan terkirim, halaman akan otomatis direset</li>
+        </ul>
       </div>
 
       <input type="hidden" id="webAppUrl" value="https://script.google.com/macros/s/AKfycbyz4fnqITdbXML9NxSg3OYAHAfxD6ru-MUZ4-KK81JEFaE3dAvsTwzn365Nbsw3gJ_ZHw/exec" />
@@ -159,7 +170,7 @@
       </button>
       
       <button type="button" class="btn btn-clear" id="clearBtn">
-        🗑️ Hapus Semua Data
+        🗑️ Hapus Semua Data (Manual)
       </button>
     </form>
 
@@ -203,7 +214,6 @@
       return isOpen;
     }
 
-    // Update clock every second
     setInterval(() => {
       if (!checkOperatingHours()) {
         const now = new Date();
@@ -212,9 +222,7 @@
       }
     }, 1000);
 
-    // Initial check
     if (!checkOperatingHours()) {
-      // Block all interactions when closed
       document.body.style.overflow = 'hidden';
     }
 
@@ -247,7 +255,6 @@
         
         if (savedOrder) {
           Object.assign(state, JSON.parse(savedOrder));
-          // Restore quantity inputs
           Object.entries(state).forEach(([id, qty]) => {
             const input = document.querySelector(`input[data-id="${id}"]`);
             if (input) input.value = qty;
@@ -362,7 +369,7 @@
       });
     }
 
-    // ============ SUCCESS MODAL ============
+    // ============ SUCCESS MODAL WITH AUTO-CLOSE ============
     function showSuccessModal(data) {
       const details = `
         <div><strong>📦 Item:</strong> ${data.orderCount} item</div>
@@ -372,15 +379,32 @@
       `;
       document.getElementById('modalDetails').innerHTML = details;
       document.getElementById('successModal').classList.add('show');
+      
+      // AUTO-CLOSE & AUTO-CLEAR AFTER 3 SECONDS
+      setTimeout(() => {
+        closeSuccessModalAndClear();
+      }, 3000);
     }
 
-    function closeSuccessModal() {
+    function closeSuccessModalAndClear() {
+      // Close modal
       document.getElementById('successModal').classList.remove('show');
+      
+      // Clear all data immediately
+      clearStorage();
+      document.getElementById('orderForm').reset();
+      document.getElementById('filePreview').classList.remove('show');
+      Object.keys(state).forEach(k=>delete state[k]);
+      document.querySelectorAll('#menuGrid input[type=number]').forEach(i=>i.value=0);
+      savedFile = null;
+      renderOrder();
+      
+      // Scroll to top
+      window.scrollTo({top: 0, behavior: 'smooth'});
     }
 
     // ============ FORM SUBMISSION ============
     async function submitOrder(){
-      // Check operating hours
       if (!checkOperatingHours()) {
         alert('❌ Maaf, kami sedang tutup. Silakan pesan saat jam operasional (06:00 - 18:00 WIB)');
         return;
@@ -392,7 +416,6 @@
       const submitBtn = document.getElementById('submitBtn');
       const btnText = document.getElementById('btnText');
 
-      // Validations
       document.querySelectorAll('.form-input').forEach(el => el.classList.remove('error'));
 
       if(!nama){ 
@@ -429,7 +452,6 @@
         return;
       }
 
-      // Start submission
       submitBtn.disabled = true;
       btnText.textContent = '⏳ Mengupload...';
       
@@ -449,19 +471,8 @@
         const data = await res.json();
         
         if(data.status === 'ok'){
-          // Show success modal
+          // Show success modal (will auto-close and auto-clear after 3 seconds)
           showSuccessModal(data);
-          
-          // Clear everything
-          clearStorage();
-          document.getElementById('orderForm').reset();
-          document.getElementById('filePreview').classList.remove('show');
-          Object.keys(state).forEach(k=>delete state[k]);
-          document.querySelectorAll('#menuGrid input[type=number]').forEach(i=>i.value=0);
-          savedFile = null;
-          renderOrder();
-          
-          window.scrollTo({top: 0, behavior: 'smooth'});
         } else {
           alert('❌ ' + (data.message || 'Gagal mengirim'));
         }
@@ -475,7 +486,7 @@
     }
 
     function clearAllData(){
-      if(confirm('Hapus semua data pesanan?')){
+      if(confirm('Hapus semua data pesanan?\n\nData yang tersimpan sementara akan dihapus.')){
         clearStorage();
         document.getElementById('orderForm').reset();
         document.getElementById('filePreview').classList.remove('show');
