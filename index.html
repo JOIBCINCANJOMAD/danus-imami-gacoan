@@ -174,26 +174,42 @@
       </button>
     </form>
 
-    <div class="note">
-      <div class="note-title">💳 Informasi Pembayaran</div>
-      <p><strong>Transfer ke rekening:</strong><br>
-      BCA: <strong>1234567890</strong><br>
-      a.n. <strong>Warung Mie</strong></p>
-      <p style="margin-top:10px">Setelah transfer, <strong>WAJIB</strong> upload bukti pembayaran.</p>
-    </div>
-  </div>
+    <div class="note" style="text-align:center">
+  <div class="note-title">💳 Pembayaran via QRIS</div>
+
+  <img 
+    src="https://github.com/JOIBCINCANJOMAD/danus-imami-gacoan/edit/main/kodeqris.jpg" 
+    alt="QRIS Pembayaran" 
+    style="width: 90%; max-width: 320px; border-radius: 12px; margin: 15px auto; display:block;"
+  >
+
+  <p>Silakan scan QRIS di atas untuk melakukan pembayaran.</p>
+  <p><strong>WAJIB upload bukti pembayaran.</strong></p>
+</div>
+
 
   <script>
     const MENU = [
-      {id:'Mie Hompimpa Lv1', price:15000}, {id:'Mie Hompimpa Lv3', price:15000},
-      {id:'Mie Gacoan Lv0', price:15000}, {id:'Mie Gacoan Lv1', price:15000},
-      {id:'Mie Gacoan Lv2', price:15000}, {id:'Mie Gacoan Lv3', price:15000},
-      {id:'Mie Gacoan Lv4', price:15000}, {id:'Mie Gacoan Lv6', price:15000},
-      {id:'Udang Keju', price:12000}, {id:'Udang Rambutan', price:12000},
-      {id:'Pangsit Goreng', price:14000}, {id:'Siomay', price:13000},
-      {id:'Lumpia Udang', price:13000}, {id:'Lemon Tea', price:8000},
-      {id:'Tea', price:6000}, {id:'Es Gobak Sodor', price:16000}
-    ];
+  {id:'Mie Hompimpa Lv1', price:15000}, {id:'Mie Hompimpa Lv2', price:15000},
+  {id:'Mie Hompimpa Lv3', price:15000}, {id:'Mie Hompimpa Lv4', price:15000},
+  {id:'Mie Hompimpa Lv6', price:15000}, {id:'Mie Hompimpa Lv7', price:15000},
+  {id:'Mie Hompimpa Lv8', price:15000},
+
+  {id:'Mie Gacoan Lv0', price:15000}, {id:'Mie Gacoan Lv1', price:15000},
+  {id:'Mie Gacoan Lv2', price:15000}, {id:'Mie Gacoan Lv3', price:15000},
+  {id:'Mie Gacoan Lv4', price:15000}, {id:'Mie Gacoan Lv6', price:15000},
+  {id:'Mie Gacoan Lv7', price:15000}, {id:'Mie Gacoan Lv8', price:15000},
+
+  {id:'Mie Suit', price:15000},
+
+  {id:'Udang Keju', price:12000}, {id:'Udang Rambutan', price:12000},
+  {id:'Pangsit Goreng', price:14000}, {id:'Siomay', price:13000},
+  {id:'Lumpia Udang', price:13000},
+
+  {id:'Lemon Tea', price:8000}, {id:'Tea', price:6000},
+  {id:'Es Gobak Sodor', price:16000}, {id:'Es Teklek', price:10000},
+  {id:'Es Sluku Bathok', price:10000}, {id:'Es Petak Umpet', price:15000}
+];
 
     const state = {};
     let savedFile = null;
